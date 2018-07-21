@@ -340,6 +340,66 @@ void DisplayDots(unsigned char DotByte)
      }
 }
  
+
+/*由于12C单片机不支持AD相关寄存器的位寻址,需使用“|”对寄存器执行位,故定义一下内容*/
+
+/*“|”说明,之后不再提到X指未知量0x80=1000 0000B 0xXX | 0x80 = 1XXX XXXXB*/ /*“&”说明,0xEF=0111 1111B 0xXX & 0xEF=0XXX XXXXB*/
+
+#define ADC_POWER 0x80 //ADC power control bit
+
+#define ADC_FLAG 0x10 //ADC complete flag
+
+#define ADC_START 0x08 //ADC start control bit
+
+#define ADC_SPEEDLL 0x00 //540 clocks
+
+#define ADC_SPEEDL 0x20 //360 clocks
+
+#define ADC_SPEEDH 0x40 //180 clocks
+
+#define ADC_SPEEDHH 0x60 //90 clocks
+
+//AD的初始化
+
+void InitADC(){
+	P1ASF = 0xff; //Set all P1 as analog input port 0xff=1111 1111B 即P1全部用作AD,使用时根据实际情况赋值
+	ADC_RES = 0; //清空转换结果存储寄存器
+	ADC_RESL=0;
+	ADC_CONTR = 0x00;
+	_nop_;_nop_;_nop_;_nop_;//等待ADC_CONTR值写入
+}
+
+//AD转换函数编写时,我们设计函数返回值为转换结果,函数参数包括要转换的引脚、转换速率,如果全部程序AD转换速率不变,可直接将speed的值在初始化时写入,
+
+unsigned int GetADC(unsigned char ch,unsigned char speed){
+		unsigned int res;
+		ADC_CONTR =ADC_CONTR | ADC_POWER | speed | ADC_START | ch;
+		_nop_;_nop_;_nop_;_nop_;//确保ADC_CONTR的值写入
+
+		while(!(ADC_CONTR & 0x10)); //如果AD转换未结束FLAG位为0,程序在此等待,如果为1,跳出循环
+		res=ADC_RES*4+ADC_RESL; //读AD转换结果,公式自己理解
+		ADC_RES=0;
+		ADC_RESL=0;
+		ADC_CONTR=0; //寄存器复位
+	return res;
+
+}
+#define N 5
+unsigned char value_buff[N];
+unsigned char i=0;
+unsigned char filter()
+{
+     unsigned char count;
+     unsigned int sum=0;
+     value_buff[i++]=get_data();
+     if(i==N)
+         i=0;
+for(count=0;count<N;count++)
+       sum=value_buff[count];
+return (unsigned char)(sum/N);
+}
+
+/*
 unsigned short	Get_ADC10bitResult(unsigned char channel)	//channel = 0~7
 {
 	ADC_RES = 0;
@@ -352,7 +412,7 @@ unsigned short	Get_ADC10bitResult(unsigned char channel)	//channel = 0~7
 	ADC_CONTR &= ~0x10;		//清除ADC结束标志
 	return	(((unsigned short)ADC_RES << 2) | (ADC_RESL & 3));			
 }
-
+*/
 
 void main( void )
 {     
@@ -371,14 +431,18 @@ void main( void )
 	//ADC初始化
 	P1M1 |= (1<<3);		// 把ADC口设置为高阻输入
 	P1M0 &= ~(1<<3);
-	P1ASF = (1<<3);		//P1.3做ADC
-	ADC_CONTR = 0xE0;	//90T, ADC power on
-    
+	//P1ASF = (1<<3);		//P1.3做ADC
+	//ADC_CONTR = 0xE0;	//90T, ADC power on
+    InitADC();
+
 	 while(1)
-     {  unsigned char Fr;
-	 	unsigned char V;
-		unsigned char j;
+     {  
 		
+		unsigned char Fr;
+	 	unsigned char V;
+		
+		/*
+		unsigned char j;
 		u16	msecond;
 
 		u16	Bandgap;	//
@@ -386,18 +450,18 @@ void main( void )
 
 		Fr=Get_ADC10bitResult(1);
 	 	V=Get_ADC10bitResult(2);
-        
-		
-		
 		P1ASF = 0;
 				Get_ADC10bitResult(0);	//改变P1ASF后先读一次并丢弃结果, 让内部的采样电容的电压等于输入值.
 				Bandgap = Get_ADC10bitResult(0);	//读内部基准ADC, P1ASF=0, 读0通道
 				P1ASF = 1<<3;
 				j = Get_ADC10bitResult(3);	//读外部电压ADC
 				j = (u16)((u32)j * 123 / Bandgap);	//计算外部电压, Bandgap为1.23V, 测电压分辨率0.01V
+		*/
 
-		PutStr(0,0,"      f-v       ");
-		sprintf(buf, " f = %d  ",j);
+		Fr=GetADC(0,00);
+		V=filter(GetADC(3,00));
+		PutStr(0,0,"      f-V       ");
+		sprintf(buf, " f = %d  ",Fr);
 		PutStr(1,0,buf);
 		sprintf(buf, " V = %d  ",V);
 		PutStr(2,0,buf);
