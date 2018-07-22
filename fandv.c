@@ -49,7 +49,7 @@ __sfr __at (0xC9) P5M1;//                                                       
 /*--------------------------------------------------------------------------------*/
 
 	/*硬件延时N ms*/
-	void Hardware_Delay_T0(unsigned int N)   
+/*	void Hardware_Delay_T0(unsigned int N)   
 	{
 		unsigned int ms;
 		         
@@ -71,7 +71,7 @@ __sfr __at (0xC9) P5M1;//                                                       
 
 			TR0 = 0;          // Stop Timer 0
 		}
-	}        
+	}*/        
 /*--------------------------------------------------------------------------------*/
 
 
@@ -384,6 +384,7 @@ unsigned int GetADC(unsigned char ch,unsigned char speed){
 	return res;
 
 }
+/*
 #define N 5
 unsigned char value_buff[N];
 unsigned char i=0;
@@ -398,7 +399,7 @@ for(count=0;count<N;count++)
        sum=value_buff[count];
 return (unsigned char)(sum/N);
 }
-
+*/
 /*
 unsigned short	Get_ADC10bitResult(unsigned char channel)	//channel = 0~7
 {
@@ -429,8 +430,8 @@ void main( void )
 	P5M1 = 0;	P5M0 = 0;	//设置为准双向口
 	
 	//ADC初始化
-	P1M1 |= (1<<3);		// 把ADC口设置为高阻输入
-	P1M0 &= ~(1<<3);
+	//P1M1 |= (1<<3);		// 把ADC口设置为高阻输入
+	//P1M0 &= ~(1<<3);
 	//P1ASF = (1<<3);		//P1.3做ADC
 	//ADC_CONTR = 0xE0;	//90T, ADC power on
     InitADC();
@@ -438,8 +439,8 @@ void main( void )
 	 while(1)
      {  
 		
-		unsigned char Fr;
-	 	unsigned char V;
+		unsigned short Fr;
+	 	unsigned short V;
 		
 		/*
 		unsigned char j;
@@ -457,19 +458,31 @@ void main( void )
 				j = Get_ADC10bitResult(3);	//读外部电压ADC
 				j = (u16)((u32)j * 123 / Bandgap);	//计算外部电压, Bandgap为1.23V, 测电压分辨率0.01V
 		*/
-
+		
+		unsigned char ge,shi,bai,qian,wan;
 		Fr=GetADC(0,00);
-		V=filter(GetADC(3,00));
+		V=GetADC(3,00);
+		ge=Fr%10;
+		shi=Fr/10%10;
+		bai=Fr/100%10;
+		qian=Fr/1000%10;
+		wan=Fr/10000%10;
+		
+
 		PutStr(0,0,"      f-V       ");
-		sprintf(buf, " f = %d  ",Fr);
+		sprintf(buf, " f = %d%d%d%d%d  ",wan,qian,bai,shi,ge);
 		PutStr(1,0,buf);
-		sprintf(buf, " V = %d  ",V);
+		V=GetADC(3,00);
+		ge=Fr%10;
+		shi=V/10%10;
+		bai=V/100%10;
+		qian=V/1000%10;
+		wan=V/10000%10;
+		
+		sprintf(buf, " V = %d%d%d%d%d  ",wan,qian,bai,shi,ge);
 		PutStr(2,0,buf);
 		PutStr(3,0,"****************");
-		PutStr(0,0,"                ");		//消隐
-		PutStr(1,0,"                ");		//消隐
-		PutStr(2,0,"                ");		//消隐
-		PutStr(3,0,"                ");		//消隐
+		LcmClearTXT();
 	
      }
 }
