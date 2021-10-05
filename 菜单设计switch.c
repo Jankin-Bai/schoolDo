@@ -17,7 +17,7 @@
 
 /*--------------------------------------------------------------------------------*/
 
-	/*Ó²¼şÑÓÊ±N ms*/
+	/*ç¡¬ä»¶å»¶æ—¶N ms*/
 	void Hardware_Delay_T0(unsigned int N)   
 	{
 		unsigned int ms;
@@ -46,7 +46,7 @@
 
 /*--------------------------------------------------------------------------------*/
 	
-	/*¶Ë¿Ú¶¨Òå
+	/*ç«¯å£å®šä¹‰
 		PIN DESCRIPTION   
 		P17 P16 P15 P14
  		|   |   |   |
@@ -57,21 +57,21 @@
 	*/
 	#define KeyPort P1
 
-	#define key_state_0 0      //¶¨Òå°´¼ü×´Ì¬£¨»ùÓÚ×´Ì¬»ú£©
+	#define key_state_0 0      //å®šä¹‰æŒ‰é”®çŠ¶æ€ï¼ˆåŸºäºçŠ¶æ€æœºï¼‰
 	#define key_state_1 1
 	#define key_state_2 2
 	#define key_state_3 3
 
 	#define NO_key        0
 
-	/*°´¼üÉ¨Ãèº¯Êı*/
+	/*æŒ‰é”®æ‰«æå‡½æ•°*/
 	unsigned char KeyBoardScan(void)
 	{   
 		unsigned char key_temp;
 		unsigned char key_num = NO_key;
-		static unsigned char key_status = key_state_0;         //°´¼ü×´Ì¬
+		static unsigned char key_status = key_state_0;         //æŒ‰é”®çŠ¶æ€
 
-		//Ïß·´×ª·¨É¨Ãè¼üÅÌ
+		//çº¿åè½¬æ³•æ‰«æé”®ç›˜
 		KeyPort = 0x0f;
 		key_temp = KeyPort;
 		KeyPort = 0xf0;
@@ -79,17 +79,17 @@
 		KeyPort = 0xff;
 
 	 switch(key_status){
-		/*×´Ì¬ÁãÎª³õÊ¼×´Ì¬*/
+		/*çŠ¶æ€é›¶ä¸ºåˆå§‹çŠ¶æ€*/
 		case key_state_0:                                    
 			if(key_temp != 0xff)
 				key_status = key_state_1;
 		break;
 					
-		/*×´Ì¬Ò»Îª°´¼ü°´ÏÂ×´Ì¬*/
+		/*çŠ¶æ€ä¸€ä¸ºæŒ‰é”®æŒ‰ä¸‹çŠ¶æ€*/
 		case key_state_1:                                   
 			if(key_temp == 0xff)
-				key_status = key_state_0;             //ÈôÖ»ÊÇ¶¶¶¯£¬µ÷»Ø×´Ì¬Áã
-			else{	key_status = key_state_2;            //ÈôÈ·Êµ°´ÏÂ£¬µ÷µ½×´Ì¬¶ş
+				key_status = key_state_0;             //è‹¥åªæ˜¯æŠ–åŠ¨ï¼Œè°ƒå›çŠ¶æ€é›¶
+			else{	key_status = key_state_2;            //è‹¥ç¡®å®æŒ‰ä¸‹ï¼Œè°ƒåˆ°çŠ¶æ€äºŒ
 				switch(key_temp){
 					case 0x7e:        //0111 1110
 						key_num = '1';		
@@ -143,17 +143,17 @@
 				}
 		break;
 
-		/*×´Ì¬¶ş±íÊ¾È·ÊµÓĞ°´¼ü°´ÏÂ*/
+		/*çŠ¶æ€äºŒè¡¨ç¤ºç¡®å®æœ‰æŒ‰é”®æŒ‰ä¸‹*/
 		case key_state_2:
 			if(key_temp == 0xff)
-				key_status = key_state_3;	//Èô¼ì²âµ½ËÉÊÖ£¬µ÷µ½×´Ì¬Èı
+				key_status = key_state_3;	//è‹¥æ£€æµ‹åˆ°æ¾æ‰‹ï¼Œè°ƒåˆ°çŠ¶æ€ä¸‰
 		break;
 
 		case key_state_3:
 			if(key_temp == 0xff)
-				key_status = key_state_0;	//ÈôÅĞ¶ÏÈ·ÊµËÉÊÖºó£¬µ÷»Ø³õÊ¼×´Ì¬Áã
+				key_status = key_state_0;	//è‹¥åˆ¤æ–­ç¡®å®æ¾æ‰‹åï¼Œè°ƒå›åˆå§‹çŠ¶æ€é›¶
 			else
-				key_status = key_state_2;	//ÈôÖ»ÊÇ¶¶¶¯²¢²»ÊÇÕæµÄËÉÊÖ£¬µ÷»Ø×´Ì¬¶ş
+				key_status = key_state_2;	//è‹¥åªæ˜¯æŠ–åŠ¨å¹¶ä¸æ˜¯çœŸçš„æ¾æ‰‹ï¼Œè°ƒå›çŠ¶æ€äºŒ
 		break;
 	 }		
 	 return key_num;
@@ -163,22 +163,22 @@
 /*--------------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------------
-LCDÊäÈëµÄÕıÈ·¸ñÊ½
-1.Ó¢ÎÄ×Ö·ûÃ¿ĞĞ16¸ö
-2.ºº×Ö×Ö·ûÃ¿ĞĞ8¸ö¡£(GBK±àÂë)
-3.×¢Òâ¿Õ¸ñÒ²ÒªĞ´ÉÏ¡£
+LCDè¾“å…¥çš„æ­£ç¡®æ ¼å¼
+1.è‹±æ–‡å­—ç¬¦æ¯è¡Œ16ä¸ª
+2.æ±‰å­—å­—ç¬¦æ¯è¡Œ8ä¸ªã€‚(GBKç¼–ç )
+3.æ³¨æ„ç©ºæ ¼ä¹Ÿè¦å†™ä¸Šã€‚
 ------------------------------------------------------------------------------------*/
 
-#define	CS   P2_7//µÚ4¸ùÏß  RS
-#define SID  P2_6//µÚ5¸ùÏß  RW
-#define SCK  P2_5//µÚ6¸ùÏß  E
+#define	CS   P2_7//ç¬¬4æ ¹çº¿  RS
+#define SID  P2_6//ç¬¬5æ ¹çº¿  RW
+#define SCK  P2_5//ç¬¬6æ ¹çº¿  E
 unsigned char const AC_TABLE[]={
-0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,    //µÚÒ»ĞĞºº×ÖÎ»ÖÃ  
-0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,    //µÚ¶şĞĞºº×ÖÎ»ÖÃ  
-0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,    //µÚÈıĞĞºº×ÖÎ»ÖÃ 
-0x98,0x99,0x9a,0x9b,0x9c,0x9d,0x9e,0x9f,    //µÚËÄĞĞºº×ÖÎ»ÖÃ 
+0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,    //ç¬¬ä¸€è¡Œæ±‰å­—ä½ç½®  
+0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,    //ç¬¬äºŒè¡Œæ±‰å­—ä½ç½®  
+0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,    //ç¬¬ä¸‰è¡Œæ±‰å­—ä½ç½® 
+0x98,0x99,0x9a,0x9b,0x9c,0x9d,0x9e,0x9f,    //ç¬¬å››è¡Œæ±‰å­—ä½ç½® 
 };
-/******************************** º¯ÊıÃû³Æ    £ºSendByte  ´®¿Ú·¢ËÍÒ»¸ö×Ö½Ú*****/
+/******************************** å‡½æ•°åç§°    ï¼šSendByte  ä¸²å£å‘é€ä¸€ä¸ªå­—èŠ‚*****/
 void SendByte(unsigned char Dbyte)
 {
      unsigned char i;
@@ -192,7 +192,7 @@ void SendByte(unsigned char Dbyte)
      }
 }
  
-/***********½ÓÊÕÒ»¸ö×Ö½Ú***/
+/***********æ¥æ”¶ä¸€ä¸ªå­—èŠ‚***/
 unsigned char ReceiveByte(void)
 {
      unsigned char i,temp1,temp2;
@@ -331,10 +331,10 @@ void main( void )
 		Hardware_Delay_T0(10);
 		
 		
-		PutStr(0,0,"ÖÇÄÜ´óÅï¿ØÖÆÏµÍ³");
-		PutStr(1,0,"ÎÂ¶È£º24.5 'C ");
-		PutStr(2,0,"¹âÕÕ£º2346 Lux");
-		PutStr(3,0,"Êª¶È£º64.8 %");
+		PutStr(0,0,"æ™ºèƒ½å¤§æ£šæ§åˆ¶ç³»ç»Ÿ");
+		PutStr(1,0,"æ¸©åº¦ï¼š24.5 'C ");
+		PutStr(2,0,"å…‰ç…§ï¼š2346 Lux");
+		PutStr(3,0,"æ¹¿åº¦ï¼š64.8 %");
 
      }
 	*/
@@ -344,8 +344,8 @@ while(1){
     switch(Menu_Status){
         case 0: {
 			PutStr(0,0,"     -MENU-     ");
-			PutStr(1,0,"ÊäÈë£º          ");
-			PutStr(2,0," <-:·µ»Ø ->:È·¶¨");
+			PutStr(1,0,"è¾“å…¥ï¼š          ");
+			PutStr(2,0," <-:è¿”å› ->:ç¡®å®š");
 			PutStr(3,0," Waiting...     ");
 
 			switch(KeyBoardScan()){
